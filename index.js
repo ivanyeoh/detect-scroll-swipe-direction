@@ -48,7 +48,7 @@ export default function detectScrollSwipeDirection(
     function reportDirection(direction) {
       const promise = callback(direction);
 
-      if (promise.then) {
+      if (promise && promise.then) {
         scrollLocked = true;
         promise.then(() => {
           scrollLocked = false;
