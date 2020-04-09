@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test</title>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+
+      #left-right-slideshow {
+        background-color: black;
+        color: white;
+        width: 100vw;
+        height: 300px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        scroll-snap-type: x mandatory;
+      }
+
+      #left-right-slideshow > div {
+        width: 100vw;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        scroll-snap-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="left-right-slideshow">
+      <div>slide 1</div>
+      <div>slide 2</div>
+      <div>slide 3</div>
+    </div>
+
+    <script type="module" src="./test.js"></script>
+  </body>
+</html>
