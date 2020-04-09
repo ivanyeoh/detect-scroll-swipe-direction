@@ -1,5 +1,7 @@
 # Detect scroll & swipe direction
 
+Detect both desktop scroll and mobile swipe direction
+
 ## Usage
 
 Install
@@ -16,7 +18,7 @@ import detectScrollSwipeDirection from 'detect-scroll-swipe-direction';
 detectScrollSwipeDirection(document)((direction) => {
   console.log('direction has changed', direction);
 
-  // Optional: return a promise object if you need to lock scroll e.g. until animation complete
+  // Optional: return a promise object e.g. when you need to lock scroll until an animation complete
   return new Promise((resolve) => {
     setTimeout(() => resolve(), 1000);
   });
