@@ -7,13 +7,13 @@ Detect both desktop scroll and mobile swipe direction
 Install
 
 ```
-npm install detect-scroll-swipe-direction --save
+npm install @ivanyeoh/detect-scroll-swipe-direction --save
 ```
 
 Import
 
 ```javascript
-import detectScrollSwipeDirection from 'detect-scroll-swipe-direction';
+import detectScrollSwipeDirection from '@ivanyeoh/detect-scroll-swipe-direction';
 
 detectScrollSwipeDirection(document)((direction) => {
   console.log('direction has changed', direction);

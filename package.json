@@ -1,5 +1,5 @@
 {
-  "name": "detect-scroll-swipe-direction",
+  "name": "@ivanyeoh/detect-scroll-swipe-direction",
   "version": "1.0.0",
   "repository": {
     "type": "git",
