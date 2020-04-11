@@ -4,8 +4,6 @@ const SCROLL_STOPPED_TIMEOUT = isTouchSupported ? 500 : 50;
 export default function detectScrollSwipeDirection(
   elementToScrollSwipe = document
 ) {
-  let scrollLocked = false;
-  let isScrolling = false;
   let isScrollingTimer = null;
   let firstTouchX = null;
   let firstTouchY = null;
@@ -27,22 +25,13 @@ export default function detectScrollSwipeDirection(
     }, {passive: true});
 
     elementToScrollSwipe.addEventListener("touchstart", (e) => {
-      if (scrollLocked) return;
-      if (isScrolling) return;
-
-      const { clientX, clientY } = e.touches[0];
-      firstTouchX = clientX;
-      firstTouchY = clientY;
+      const { pageX, pageY } = e.touches[0];
+      firstTouchX = pageX;
+      firstTouchY = pageY;
     }, {passive: true});
 
-    elementToScrollSwipe.addEventListener("touchmove", (e) => {
-      if (scrollLocked) return;
-      if (isScrolling) return;
+    elementToScrollSwipe.addEventListener("touchend", (e) => {
       if (!firstTouchX || !firstTouchY) return;
-
-      const { clientX, clientY } = e.touches[0];
-      const deltaX = firstTouchX - clientX;
-      const deltaY = firstTouchY - clientY;
 
       if (scrolling && !scrolling.isCompleted()) {
         scrolling.restart();
@@ -50,6 +39,10 @@ export default function detectScrollSwipeDirection(
       }
 
       scrolling = new Scrolling(elementToScrollSwipe, e.target, () => {
+        const { pageX, pageY } = e.changedTouches[0];
+        const deltaX = firstTouchX - pageX;
+        const deltaY = firstTouchY - pageY;
+
         return callback(getDirection({ deltaX, deltaY }), e);
       });
 
@@ -78,6 +71,7 @@ class Scrolling {
     this.scrollParent = this.getScrollParent(element);
     this.hitTopCount = this.hasHitTop() ? 1 : 0;
     this.hitBottomCount = this.hasHitBottom() ? 1 : 0;
+
     this.start();
   }
 
@@ -112,13 +106,15 @@ class Scrolling {
       this.complete()
     } else {
       this.timer = setTimeout(() => {
-        if (this.hasHitTop()) this.hitTopCount++;
-        if (this.hasHitBottom()) this.hitBottomCount++;
+        setTimeout(() => {
+          if (this.hasHitTop()) this.hitTopCount++;
+          if (this.hasHitBottom()) this.hitBottomCount++;
 
-        if (this.hitBottomCount === 2 || this.hitTopCount === 2) {
-          this.scrollCompleted = true;
-          this.complete();
-        }
+          if (this.hitBottomCount === 2 || this.hitTopCount === 2) {
+            this.scrollCompleted = true;
+            this.complete();
+          }
+        }, isTouchSupported ? SCROLL_STOPPED_TIMEOUT : 0) // ios elastic bounce :(
       }, SCROLL_STOPPED_TIMEOUT)
     }
   }
