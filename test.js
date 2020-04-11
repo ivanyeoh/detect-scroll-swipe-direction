@@ -23,34 +23,6 @@ function smoothScroll(element) {
   element.scrollIntoView({ behavior: 'smooth' });
 }
 
-function getScrollParent(node) {
-  if (node == null) {
-    return null;
-  }
-
-  if (node.scrollHeight > node.clientHeight) {
-    return node;
-  } else {
-    return getScrollParent(node.parentNode);
-  }
-}
-
-function scrollHitEnd(e) {
-  const { clientHeight, scrollTop, scrollHeight } = e.target;
-  const hitBottom = (clientHeight + scrollTop) >= scrollHeight;
-  const hitTop = scrollTop === 0;
-
-  // console.log('hit', hitBottom, hitTop)
-
-  if (hitBottom) {
-    // console.log('hitbottom lor')
-    e.target.dataset.hitBottom = parseInt(e.target.dataset.hitBottom || 0) + 1;
-    // e.target.removeEventListener('scroll', scrollHitEnd)
-  } else {
-    // console.log('why no hitbottom?', clientHeight, scrollTop, scrollHeight)
-  }
-}
-
 const slideshows = document.querySelector('.slideshows');
 scrollSwipeDirection(slideshows)((direction, e) => {
   console.log(direction)
