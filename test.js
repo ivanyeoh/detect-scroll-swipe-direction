@@ -20,15 +20,17 @@ function inSight(element, inSightCallback, outOfSightCallback = () => { }, perce
 };
 
 function smoothScroll(element) {
+  console.log('smoothScroll', element);
   element.scrollIntoView({ behavior: 'smooth' });
 }
 
 const slideshows = document.querySelector('.slideshows');
 scrollSwipeDirection(slideshows)((direction, e) => {
-  console.log(direction)
+  console.log(direction);
   if (!['up', 'down'].includes(direction)) return;
 
   const activeSlide = slideshows.querySelector('.slideshow > div.active');
+  console.log('activeSlide', activeSlide);
   if (!activeSlide) return
 
   const currentSlideshow = activeSlide.closest('.slideshow');
@@ -44,18 +46,22 @@ scrollSwipeDirection(slideshows)((direction, e) => {
       nextSlide = currentSlideshow.previousElementSibling;
     }
 
+    console.log('nextSlide', nextSlide)
+
     if (!nextSlide) return resolve();
 
     const firstSlide = currentSlides[0];
+    
     const unobserve = inSight(firstSlide, () => {
+      console.log('inSight', firstSlide);
       setTimeout(() => {
         smoothScroll(nextSlide);
         unobserve();
-        resolve();
       }, 300);
     }, () => {}, 50);
 
     smoothScroll(firstSlide);
+        resolve();
   });
 })
 

@@ -25,9 +25,9 @@ export default function detectScrollSwipeDirection(
     }, {passive: true});
 
     elementToScrollSwipe.addEventListener("touchstart", (e) => {
-      const { pageX, pageY } = e.touches[0];
-      firstTouchX = pageX;
-      firstTouchY = pageY;
+      const { screenX, screenY } = e.touches[0];
+      firstTouchX = screenX;
+      firstTouchY = screenY;
     }, {passive: true});
 
     elementToScrollSwipe.addEventListener("touchend", (e) => {
@@ -39,9 +39,9 @@ export default function detectScrollSwipeDirection(
       }
 
       scrolling = new Scrolling(elementToScrollSwipe, e.target, () => {
-        const { pageX, pageY } = e.changedTouches[0];
-        const deltaX = firstTouchX - pageX;
-        const deltaY = firstTouchY - pageY;
+        const { screenX, screenY } = e.changedTouches[0];
+        const deltaX = firstTouchX - screenX;
+        const deltaY = firstTouchY - screenY;
 
         return callback(getDirection({ deltaX, deltaY }), e);
       });
@@ -96,11 +96,13 @@ class Scrolling {
   }
 
   start() {
+    console.log('Start [scroll]>>>')
     this.scrollCompleted = false;
     const { scrollParent, expectedParent } = this;
 
     if (scrollParent === expectedParent) {
       this.timer = setTimeout(() => {
+        console.log('end [scroll]>>>>>')
         this.scrollCompleted = true;
       }, SCROLL_STOPPED_TIMEOUT)
       this.complete()
@@ -127,18 +129,22 @@ class Scrolling {
   }
 
   complete() {
+    console.log('Start [complete]----', this.onePromise);
+    console.log('previousPromise', this.onePromise);
     if (this.onePromise) return;
 
     this.promiseCompleted = false;
 
     let promise = this.onComplete();
     if (!(promise instanceof Promise)) {
+      console.log('Direct promise');
       promise = new Promise((resolve) => {
         resolve();
       });
     }
 
     promise.then(() => {
+      console.log('End [complete]-----', this.onePromise);
       this.promiseCompleted = true;
     })
 
