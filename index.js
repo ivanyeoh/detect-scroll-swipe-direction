@@ -2,7 +2,7 @@ const isTouchSupported =
   window.DocumentTouch && document instanceof DocumentTouch;
 const SCROLL_STOPPED_TIMEOUT = isTouchSupported ? 500 : 50;
 
-function detectScrollSwipeDirection(elementToScrollSwipe = document) {
+export default function detectScrollSwipeDirection(elementToScrollSwipe = document) {
   let isScrollingTimer = null;
   let firstTouchX = null;
   let firstTouchY = null;
