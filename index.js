@@ -1,63 +1,79 @@
-const isTouchSupported = window.DocumentTouch && document instanceof DocumentTouch;
+const isTouchSupported =
+  window.DocumentTouch && document instanceof DocumentTouch;
 const SCROLL_STOPPED_TIMEOUT = isTouchSupported ? 500 : 50;
 
-export default function detectScrollSwipeDirection(
-  elementToScrollSwipe = document
-) {
+function detectScrollSwipeDirection(elementToScrollSwipe = document) {
   let isScrollingTimer = null;
   let firstTouchX = null;
   let firstTouchY = null;
   let scrolling = null;
 
   return (callback) => {
-    elementToScrollSwipe.addEventListener("wheel", (e) => {
-      // const delta = e.wheelDelta || -e.detail;
-      // if (delta > -3 && delta < 3) return;
+    elementToScrollSwipe.addEventListener(
+      "wheel",
+      (e) => {
+        if (scrolling && !scrolling.isCompleted()) {
+          scrolling.restart();
+          return;
+        }
 
-      if (scrolling && !scrolling.isCompleted()) {
-        scrolling.restart();
-        return;
-      }
+        scrolling = new Scrolling(elementToScrollSwipe, e.target, () => {
+          const direction = getDirection(e);
+          if (direction === "tap") return;
 
-      scrolling = new Scrolling(elementToScrollSwipe, e.target, () => {
-        return callback(getDirection(e), e);
-      });
-    }, {passive: true});
+          return callback(direction, e);
+        });
+      },
+      { passive: true }
+    );
 
-    elementToScrollSwipe.addEventListener("touchstart", (e) => {
-      const { screenX, screenY } = e.touches[0];
-      firstTouchX = screenX;
-      firstTouchY = screenY;
-    }, {passive: true});
+    elementToScrollSwipe.addEventListener(
+      "touchstart",
+      (e) => {
+        const { screenX, screenY } = e.touches[0];
+        firstTouchX = screenX;
+        firstTouchY = screenY;
+      },
+      { passive: true }
+    );
 
-    elementToScrollSwipe.addEventListener("touchend", (e) => {
-      if (!firstTouchX || !firstTouchY) return;
+    elementToScrollSwipe.addEventListener(
+      "touchend",
+      (e) => {
+        if (!firstTouchX || !firstTouchY) return;
 
-      if (scrolling && !scrolling.isCompleted()) {
-        scrolling.restart();
-        return;
-      }
+        if (scrolling && !scrolling.isCompleted()) {
+          scrolling.restart();
+          return;
+        }
 
-      scrolling = new Scrolling(elementToScrollSwipe, e.target, () => {
-        const { screenX, screenY } = e.changedTouches[0];
-        const deltaX = firstTouchX - screenX;
-        const deltaY = firstTouchY - screenY;
+        scrolling = new Scrolling(elementToScrollSwipe, e.target, () => {
+          const { screenX, screenY } = e.changedTouches[0];
+          const deltaX = firstTouchX - screenX;
+          const deltaY = firstTouchY - screenY;
 
-        return callback(getDirection({ deltaX, deltaY }), e);
-      });
+          firstTouchX = null;
+          firstTouchY = null;
 
-      firstTouchX = null;
-      firstTouchY = null;
-    }, {passive: true});
+          const direction = getDirection({ deltaX, deltaY });
+          if (direction === "tap") return;
+
+          return callback(direction, e);
+        });
+      },
+      { passive: true }
+    );
   };
 }
 
 function getDirection({ deltaX, deltaY }) {
   if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (deltaX === 0) return "tap";
     if (deltaX < 0) return "left";
     return "right";
   }
 
+  if (deltaY === 0) return "tap";
   if (deltaY < 0) return "up";
   return "down";
 }
@@ -80,14 +96,17 @@ class Scrolling {
   }
 
   hasHitBottom() {
-    return (this.scrollParent.clientHeight + this.scrollParent.scrollTop) >= this.scrollParent.scrollHeight;
+    return (
+      this.scrollParent.clientHeight + this.scrollParent.scrollTop >=
+      this.scrollParent.scrollHeight
+    );
   }
 
   getScrollParent(node) {
     if (node == null) {
       return null;
     }
-  
+
     if (node.scrollHeight > node.clientHeight) {
       return node;
     } else {
@@ -96,28 +115,29 @@ class Scrolling {
   }
 
   start() {
-    console.log('Start [scroll]>>>')
     this.scrollCompleted = false;
     const { scrollParent, expectedParent } = this;
 
     if (scrollParent === expectedParent) {
       this.timer = setTimeout(() => {
-        console.log('end [scroll]>>>>>')
         this.scrollCompleted = true;
-      }, SCROLL_STOPPED_TIMEOUT)
-      this.complete()
+      }, SCROLL_STOPPED_TIMEOUT);
+      this.complete();
     } else {
       this.timer = setTimeout(() => {
-        setTimeout(() => {
-          if (this.hasHitTop()) this.hitTopCount++;
-          if (this.hasHitBottom()) this.hitBottomCount++;
+        this.timer2 = setTimeout(
+          () => {
+            if (this.hasHitTop()) this.hitTopCount++;
+            if (this.hasHitBottom()) this.hitBottomCount++;
 
-          if (this.hitBottomCount === 2 || this.hitTopCount === 2) {
-            this.scrollCompleted = true;
-            this.complete();
-          }
-        }, isTouchSupported ? SCROLL_STOPPED_TIMEOUT : 0) // ios elastic bounce :(
-      }, SCROLL_STOPPED_TIMEOUT)
+            if (this.hitBottomCount === 2 || this.hitTopCount === 2) {
+              this.scrollCompleted = true;
+              this.complete();
+            }
+          },
+          isTouchSupported ? SCROLL_STOPPED_TIMEOUT : 0
+        ); // ios elastic bounce :(
+      }, SCROLL_STOPPED_TIMEOUT);
     }
   }
 
@@ -125,28 +145,27 @@ class Scrolling {
     if (this.timer) {
       clearTimeout(this.timer);
     }
+    if (this.timer2) {
+      clearTimeout(this.timer2);
+    }
     this.start();
   }
 
   complete() {
-    console.log('Start [complete]----', this.onePromise);
-    console.log('previousPromise', this.onePromise);
     if (this.onePromise) return;
 
     this.promiseCompleted = false;
 
     let promise = this.onComplete();
     if (!(promise instanceof Promise)) {
-      console.log('Direct promise');
       promise = new Promise((resolve) => {
         resolve();
       });
     }
 
     promise.then(() => {
-      console.log('End [complete]-----', this.onePromise);
       this.promiseCompleted = true;
-    })
+    });
 
     this.onePromise = promise;
   }
