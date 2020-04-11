@@ -24,7 +24,7 @@ export default function detectScrollSwipeDirection(
       scrolling = new Scrolling(elementToScrollSwipe, e.target, () => {
         return callback(getDirection(e), e);
       });
-    });
+    }, {passive: true});
 
     elementToScrollSwipe.addEventListener("touchstart", (e) => {
       if (scrollLocked) return;
@@ -33,7 +33,7 @@ export default function detectScrollSwipeDirection(
       const { clientX, clientY } = e.touches[0];
       firstTouchX = clientX;
       firstTouchY = clientY;
-    });
+    }, {passive: true});
 
     elementToScrollSwipe.addEventListener("touchmove", (e) => {
       if (scrollLocked) return;
@@ -55,7 +55,7 @@ export default function detectScrollSwipeDirection(
 
       firstTouchX = null;
       firstTouchY = null;
-    });
+    }, {passive: true});
   };
 }
 
