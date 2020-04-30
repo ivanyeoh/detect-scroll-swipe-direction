@@ -2,8 +2,9 @@ const isTouchSupported =
   window.DocumentTouch && document instanceof DocumentTouch;
 const SCROLL_STOPPED_TIMEOUT = isTouchSupported ? 500 : 50;
 
-export default function detectScrollSwipeDirection(elementToScrollSwipe = document) {
-  let isScrollingTimer = null;
+export default function detectScrollSwipeDirection(
+  elementToScrollSwipe = document
+) {
   let firstTouchX = null;
   let firstTouchY = null;
   let scrolling = null;
@@ -102,6 +103,11 @@ class Scrolling {
     );
   }
 
+  hasScrollbar(elem) {
+    if (elem.clientHeight < elem.scrollHeight) return true;
+    return false;
+  }
+
   getScrollParent(node) {
     if (node == null) {
       return null;
@@ -116,29 +122,30 @@ class Scrolling {
 
   start() {
     this.scrollCompleted = false;
-    const { scrollParent, expectedParent } = this;
+    // const { scrollParent, expectedParent } = this;
 
-    if (scrollParent === expectedParent) {
-      this.timer = setTimeout(() => {
-        this.scrollCompleted = true;
-      }, SCROLL_STOPPED_TIMEOUT);
+    // if (
+    //     JSON.stringify(expectedParent.getBoundingClientRect()) !==
+    //         JSON.stringify(scrollParent.getBoundingClientRect()) &&
+    //     this.hasScrollbar(scrollParent)
+    // ) {
+    //     this.timer = setTimeout(() => {
+    //         this.timer2 = setTimeout(() => {
+    //             if (this.hasHitTop()) this.hitTopCount++;
+    //             if (this.hasHitBottom()) this.hitBottomCount++;
+
+    //             if (this.hitBottomCount === 2 || this.hitTopCount === 2) {
+    //                 this.scrollCompleted = true;
+    //                 this.complete();
+    //             }
+    //         }, isTouchSupported ? SCROLL_STOPPED_TIMEOUT : 0); // ios elastic bounce :(
+    //     }, SCROLL_STOPPED_TIMEOUT);
+    // } else {
+    this.timer = setTimeout(() => {
+      this.scrollCompleted = true;
       this.complete();
-    } else {
-      this.timer = setTimeout(() => {
-        this.timer2 = setTimeout(
-          () => {
-            if (this.hasHitTop()) this.hitTopCount++;
-            if (this.hasHitBottom()) this.hitBottomCount++;
-
-            if (this.hitBottomCount === 2 || this.hitTopCount === 2) {
-              this.scrollCompleted = true;
-              this.complete();
-            }
-          },
-          isTouchSupported ? SCROLL_STOPPED_TIMEOUT : 0
-        ); // ios elastic bounce :(
-      }, SCROLL_STOPPED_TIMEOUT);
-    }
+    }, SCROLL_STOPPED_TIMEOUT);
+    // }
   }
 
   restart() {
